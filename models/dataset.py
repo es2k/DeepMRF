@@ -36,17 +36,18 @@ class BrainSegmentationDataset(Dataset):
             mask_slices = []
             for filename in sorted(
                 filter(lambda f: ".tif" in f, filenames),
-                key=lambda x: int(x.split(".")[-2].split("_")[4]),
+                key=lambda x: int(x.split("_")[0]),
             ):
                 filepath = os.path.join(dirpath, filename)
                 if "mask" in filename:
                     mask_slices.append(imread(filepath, as_gray=True))
                 else:
                     image_slices.append(imread(filepath))
+            #print(len(mask_slices),len(image_slices))
             if len(image_slices) > 0:
                 patient_id = dirpath.split("/")[-1]
-                volumes[patient_id] = np.array(image_slices[1:-1])
-                masks[patient_id] = np.array(mask_slices[1:-1])
+                volumes[patient_id] = np.array(image_slices) #remove [1:-1]
+                masks[patient_id] = np.array(mask_slices)
 
         self.patients = sorted(volumes)
 

@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 import torch
+import cv2
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from medpy.filter.binary import largest_connected_component
@@ -63,6 +64,7 @@ def main(args):
         x = volumes[p][0]
         y_pred = volumes[p][1]
         y_true = volumes[p][2]
+        y_map = volumes[p][3]
         for s in range(x.shape[0]):
             image = gray2rgb(x[s, 1])  # channel 1 is for FLAIR
             image = outline(image, y_pred[s, 0], color=[255, 0, 0])
@@ -70,6 +72,16 @@ def main(args):
             filename = "{}-{}.png".format(p, str(s).zfill(2))
             filepath = os.path.join(args.predictions, filename)
             imsave(filepath, image)
+            gray = x[s].transpose(1,2,0)[...,:3]@[0.299, 0.587, 0.114]
+            gray-=gray.min()
+            gray/=gray.max()
+            gray = np.uint8(gray*255.999)
+            gray_rgb=cv2.cvtColor(gray,cv2.COLOR_GRAY2RGB)
+            jet_gray = np.uint8(y_map[s][0]*255.999)
+            jet_bgr = cv2.applyColorMap(jet_gray, cv2.COLORMAP_MAGMA)
+            jet_rgb = cv2.cvtColor(jet_bgr, cv2.COLOR_BGR2RGB)
+            fin = (gray_rgb*0.3+jet_rgb*0.7).astype('uint8')
+            plt.imsave(filepath.replace('intermediate','probmaps'),fin)
 
 
 def data_loader(args):
@@ -88,6 +100,7 @@ def data_loader(args):
 def postprocess_per_volume(
     input_list, pred_list, true_list, patient_slice_index, patients
 ):
+    print(patient_slice_index,patients,len(input_list),pred_list[0].shape,true_list[0].shape)
     volumes = {}
     num_slices = np.bincount([p[0] for p in patient_slice_index])
     index = 0
@@ -96,9 +109,13 @@ def postprocess_per_volume(
         volume_pred = np.round(
             np.array(pred_list[index : index + num_slices[p]])
         ).astype(int)
-        volume_pred = largest_connected_component(volume_pred)
+        volume_map = np.array(pred_list[index : index + num_slices[p]])
+        #print(volume_map.shape)
+        #volume_pred = largest_connected_component(volume_pred)
         volume_true = np.array(true_list[index : index + num_slices[p]])
-        volumes[patients[p]] = (volume_in, volume_pred, volume_true)
+        volumes[patients[p]] = (volume_in, volume_pred, volume_true, volume_map)
+        #print(volume_pred)
+        #print(volume_pred.max())
         index += num_slices[p]
     return volumes
 
@@ -176,7 +193,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--figure",
         type=str,
-        default="./dsc.png",
+        default="./mrf.png",
         help="filename for DSC distribution figure",
     )
 
