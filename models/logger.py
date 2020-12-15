@@ -37,7 +37,8 @@ class Logger(object):
         img_summaries = []
         for i, img in enumerate(images):
             s = BytesIO()
-            scipy.misc.toimage(img).save(s, format="png")
+            im = Image.fromarray(img)
+            im.save(s, formats="png")
 
             # Create an Image object
             img_sum = tf.Summary.Image(
