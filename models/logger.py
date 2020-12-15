@@ -17,7 +17,7 @@ class Logger(object):
     def image_summary(self, tag, image, step):
         s = BytesIO()
         im = Image.fromarray(image)
-        im.save(s, formats="png")
+        im.save(s+".png")
 
         # Create an Image object
         img_sum = tf.Summary.Image(
@@ -38,7 +38,7 @@ class Logger(object):
         for i, img in enumerate(images):
             s = BytesIO()
             im = Image.fromarray(img)
-            im.save(s, formats="png")
+            im.save(s+".png")
 
             # Create an Image object
             img_sum = tf.Summary.Image(
