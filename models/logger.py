@@ -38,8 +38,7 @@ class Logger(object):
     def image_list_summary(self, tag, images, step):
         if len(images) == 0:
             return
-        img_summaries = []
-        for i, img in enumerate(images):
-            with self.writer.as_default():
-                tf.summary.image(tag+'/'+str(i), img, step=step)
-                self.writer.flush()
+
+        with self.writer.as_default():
+            tf.summary.image(tag, images, step=step)
+            self.writer.flush()
