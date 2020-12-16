@@ -72,7 +72,7 @@ def main(args):
             filename = "{}-{}.png".format(p, str(s).zfill(2))
             filepath = os.path.join(args.predictions, filename)
             imsave(filepath, image)
-            gray = x[s].transpose(1,2,0)[...,:3]@[0.299, 0.587, 0.114]
+            '''gray = x[s].transpose(1,2,0)[...,:3]@[0.299, 0.587, 0.114]
             gray-=gray.min()
             gray/=gray.max()
             gray = np.uint8(gray*255.999)
@@ -81,7 +81,7 @@ def main(args):
             jet_bgr = cv2.applyColorMap(jet_gray, cv2.COLORMAP_MAGMA)
             jet_rgb = cv2.cvtColor(jet_bgr, cv2.COLOR_BGR2RGB)
             fin = (gray_rgb*0.3+jet_rgb*0.7).astype('uint8')
-            plt.imsave(filepath.replace('intermediate','probmaps'),fin)
+            plt.imsave(filepath.replace('intermediate','probmaps'),fin)'''
 
 
 def data_loader(args):
@@ -111,7 +111,7 @@ def postprocess_per_volume(
         ).astype(int)
         volume_map = np.array(pred_list[index : index + num_slices[p]])
         #print(volume_map.shape)
-        #volume_pred = largest_connected_component(volume_pred)
+        volume_pred = largest_connected_component(volume_pred)
         volume_true = np.array(true_list[index : index + num_slices[p]])
         volumes[patients[p]] = (volume_in, volume_pred, volume_true, volume_map)
         #print(volume_pred)
@@ -134,7 +134,7 @@ def plot_dsc(dsc_dist):
     dsc_dist = sorted(dsc_dist.items(), key=lambda x: x[1])
     values = [x[1] for x in dsc_dist]
     labels = [x[0] for x in dsc_dist]
-    labels = ["_".join(l.split("_")[1:-1]) for l in labels]
+    labels = [str(l) for l in labels]
     fig = plt.figure(figsize=(12, 8))
     canvas = FigureCanvasAgg(fig)
     plt.barh(y_positions, values, align="center", color="skyblue")
