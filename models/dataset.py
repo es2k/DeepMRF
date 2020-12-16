@@ -24,6 +24,7 @@ class BrainSegmentationDataset(Dataset):
         random_sampling=True,
         validation_cases=10,
         seed=42,
+        imtype='mrf',
     ):
         assert subset in ["all", "train", "validation"]
 
@@ -41,8 +42,15 @@ class BrainSegmentationDataset(Dataset):
                 filepath = os.path.join(dirpath, filename)
                 if "bi" in filename:
                     mask_slices.append(imread(filepath, as_gray=True))
-                elif 'rgb' in filename:
-                    image_slices.append(imread(filepath))
+                else:
+                    if imtype == 'mrf':
+                        if 'rgb' in filename:
+                            image_slices.append(imread(filepath))
+                    elif imtype == 't1t2':
+                        if 't1t2' in filename:
+                            image_slices.append(imread(filepath))
+                    else:
+                        print('ERROR Image Type')
             #print(len(mask_slices),len(image_slices))
             for i in range(len(image_slices)):
                 volumes[i]=np.array([image_slices[i]])

@@ -85,11 +85,13 @@ def main(args):
 
 
 def data_loader(args):
+    print(args)
     dataset = Dataset(
         images_dir=args.images,
         subset="validation",
         image_size=args.image_size,
         random_sampling=False,
+        imtype=args.imtype,
     )
     loader = DataLoader(
         dataset, batch_size=args.batch_size, drop_last=False, num_workers=1
@@ -111,7 +113,10 @@ def postprocess_per_volume(
         ).astype(int)
         volume_map = np.array(pred_list[index : index + num_slices[p]])
         #print(volume_map.shape)
-        volume_pred = largest_connected_component(volume_pred)
+        try:
+            volume_pred = largest_connected_component(volume_pred)
+        except:
+            print(volume_pred.max())
         volume_true = np.array(true_list[index : index + num_slices[p]])
         volumes[patients[p]] = (volume_in, volume_pred, volume_true, volume_map)
         #print(volume_pred)
@@ -195,6 +200,12 @@ if __name__ == "__main__":
         type=str,
         default="./mrf.png",
         help="filename for DSC distribution figure",
+    )
+    parser.add_argument(
+        "--imtype",
+        type=str,
+        default='mrf',
+        help="mrf or t1t2"
     )
 
     args = parser.parse_args()

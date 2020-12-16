@@ -140,12 +140,14 @@ def datasets(args):
         subset="train",
         image_size=args.image_size,
         transform=transforms(scale=args.aug_scale, angle=args.aug_angle, flip_prob=0.5),
+        imtype=args.imtype,
     )
     valid = Dataset(
         images_dir=args.images,
         subset="validation",
         image_size=args.image_size,
         random_sampling=False,
+        imtype=args.imtype
     )
     return train, valid
 
@@ -249,6 +251,12 @@ if __name__ == "__main__":
         type=int,
         default=15,
         help="rotation angle range in degrees for augmentation (default: 15)",
+    )
+    parser.add_argument(
+        "--imtype",
+        type=str,
+        default='mrf',
+        help="mrf or t1t2"
     )
     args = parser.parse_args()
     main(args)
